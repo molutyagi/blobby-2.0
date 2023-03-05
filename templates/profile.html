@@ -1,0 +1,97 @@
+{% extends 'bootstrap/base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+
+{% block content %}
+{% include "header.html" %}
+
+<!-- Page Header -->
+
+{% if user.wall %}
+<header class="masthead"
+        style="background-image: url('{{ url_for('user_bp.wall_img', filename=user.wall) }}'); height:70vh">
+    {% else %}
+    <header class="masthead"
+            style="background-image: url({{ url_for('static', filename='img/def_wall.jpg')}}); height:70vh">
+        {% endif %}
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/clean-blog.css') }}">
+        <div class="overlay"></div>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-md-8 mx-auto">
+                    <div class="page-heading">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="profile-section">
+            <div class="profile-picture">
+                {% if user.profile %}
+                <div class="profile-picture-image"
+                     style="background-image: url('{{ url_for('user_bp.profile_img', filename=user.profile) }}');">
+                </div>
+                {% else %}
+                <div class="profile-picture-image"
+                    style="background-image: url({{ url_for('static', filename='img/def_user.jpg')}});">
+                </div>
+                {% endif %}
+            </div>
+            <h1>{{ user.name }}</h1>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-md-10 mx-auto">
+                    {{ user.about|safe }}
+                    <hr>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-md-10 mx-auto">
+                    <div class="clearfix">
+                        {% if current_user.id == user.id %}
+                        <a class="btn btn-primary float-right"
+                           href="{{url_for('user_bp.edit_user', user_id=current_user.id)}}">Edit
+                            Profile
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                    {% for message in messages %}
+                    <p>{{ message }}</p>
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+                    {% for post in all_posts %}
+                    <div class="post-preview">
+                        <a href="{{ url_for('show_post', post_id=post.id) }}">
+                            <h2 class="post-title">
+                                {{post.title}}
+                            </h2>
+                            <h3 class="post-subtitle">
+                                {{post.subtitle}}
+                            </h3>
+                        </a>
+                        <p class="post-meta">Posted by
+                            <a href="#">{{post.author.name}}</a>
+                            on {{post.date}}
+                            {% if current_user.id in [1,2,3] or current_user.id == user.id %}
+                            <a href="{{url_for('delete_post', post_id=post.id) }}">✘</a>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+    {% include "footer.html" %}
+    {% endblock %}
