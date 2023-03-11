@@ -7,7 +7,7 @@
 
 <!-- Page Header -->
 <header class="masthead"
-        style="background-image: url({{ url_for('static', filename='img/default_profile/IMG_3420.JPG')}}); height:60vh">
+        style="background-image: url('{% if user.wall %}{{ url_for('user_bp.wall_img', filename=user.wall) }}{% else %}{{ url_for('static', filename='img/default_profile/def_wall.jpg') }}{% endif %}'); height:70vh">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/clean-blog.css') }}">
     <div class="overlay"></div>
     <div class="container">
@@ -20,17 +20,11 @@
     </div>
     <div class="profile-section">
         <div class="profile-picture">
-            {% if current_user %}
             <div class="profile-picture-image"
-                 style="background-image: url('{{ url_for('static', filename='img/default_profile/IMG_34201.JPG') }}');">
+                 style="background-image: url('{% if user.profile %}{{ url_for('user_bp.profile_img', filename=user.profile) }}{% else %}{{ url_for('static', filename='img/default_profile/def_user.png') }}{% endif %}')">
             </div>
-            {% else %}
-            <div class="default-profile-picture">
-                <i class="fa fa-user"></i>
-            </div>
-            {% endif %}
         </div>
-        <h1>{{ current_user.name }}</h1>
+        <h1>{{ user.name }}</h1>
     </div>
 </header>
 
@@ -38,12 +32,28 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-md-10 mx-auto">
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                {% for message in messages %}
+                <p>{{ message }}</p>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+
                 {{ ckeditor.load() }}
                 {{ ckeditor.config(name='body') }}
                 {{ wtf.quick_form(form, enctype="multipart/form-data", novalidate=True, button_map={"submit":
                 "primary"}) }}
             </div>
         </div>
+    </div>
+    <div class="clearfix">
+        {% if current_user.id == user.id %}
+        <a class="btn btn-primary float-right"
+           href="{{url_for('user_bp.delete_user', user_id=current_user.id)}}">Delete User
+            Profile
+        </a>
+        {% endif %}
     </div>
 </main>
 
