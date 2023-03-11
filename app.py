@@ -5,16 +5,20 @@ from flask import Flask, render_template, redirect, url_for, flash, abort, send_
 from flask_bootstrap import Bootstrap
 from flask_ckeditor import CKEditor
 from datetime import date
-from flask_login import LoginManager, current_user
+from flask_login import LoginManager, current_user, login_required
 from flask_gravatar import Gravatar
 import secrets
+
+from requests import post
+
 from flask_session import Session
 from db import User, BlogPost, db, Comment
-from forms import CommentForm, CreatePostForm
+from forms import CommentForm, CreatePostForm, SearchForm
 from functions import delete_file, img_to_uuid
 from log_reg import log_bp
 from others import others_bp
 from manage_user import user_bp
+
 # from manage_post import post_bp
 
 app = Flask(__name__)
@@ -23,7 +27,7 @@ app.config['SECRET_KEY'] = secrets.token_hex(16)
 
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
-Session(app)
+# Session(app)
 
 print("Hello world")
 
@@ -33,9 +37,9 @@ Bootstrap(app)
 # CONNECT TO DB
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///blog.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-UPLOAD_USER_IMG = "dynamic/uploads/profile_pic"
+UPLOAD_USER_IMG = "dynamic/profile_pic"
 app.config['UPLOAD_USER_IMG'] = UPLOAD_USER_IMG
-UPLOAD_BLOG_IMG = "dynamic/uploads/blog_img"
+UPLOAD_BLOG_IMG = "dynamic/blog_img"
 app.config['UPLOAD_BLOG_IMG'] = UPLOAD_BLOG_IMG
 app.config['STATIC_FOLDER'] = 'static'
 # db = SQLAlchemy(app)
@@ -79,18 +83,39 @@ gravatar = Gravatar(app,
                     base_url=None)
 year = date.today().year
 
+
 @app.route('/')
 def get_all_posts():
     posts = BlogPost.query.all()
     return render_template("index.html", all_posts=posts, logged_in=current_user.is_authenticated, year=year)
 
 
+# @app.route('/search', methods=["POST"])
+# def search():
+#     form = SearchForm()
+#     posts = BlogPost.query
+#     if form.validate_on_submit():
+#         # Get data from submitted form
+#         post.searched = form.searched.data
+#         # Query the Database
+#         posts = posts.filter(BlogPost.content.like('%' + post.searched + '%'))
+#         posts = posts.order_by(BlogPost.title).all()
+#
+#         return render_template("search.html",
+#                                form=form,
+#                                searched=post.searched,
+#                                posts=posts)
+
+
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_BLOG_IMG'], filename)
+
+
 #
 #
 @app.route("/post/<int:post_id>", methods=["GET", "POST"])
+@login_required
 def show_post(post_id):
     if current_user.is_authenticated:
         requested_post = BlogPost.query.get_or_404(post_id)
@@ -116,7 +141,7 @@ def show_post(post_id):
 
 
 @app.route("/new-post", methods=["GET", "POST"])
-@admin_only
+@login_required
 def add_new_post():
     form = CreatePostForm()
     if form.validate_on_submit():
@@ -138,7 +163,7 @@ def add_new_post():
 
 
 @app.route("/edit-post/<int:post_id>", methods=["GET", "POST"])
-@admin_only
+@login_required
 def edit_post(post_id):
     post = BlogPost.query.get_or_404(post_id)
     edit_form = CreatePostForm(
@@ -167,7 +192,7 @@ def edit_post(post_id):
 
 
 @app.route("/delete/<int:post_id>", methods=["GET", "POST"])
-@admin_only
+@login_required
 def delete_post(post_id):
     post_to_delete = BlogPost.query.get_or_404(post_id)
     file_path = os.path.join(UPLOAD_BLOG_IMG, post_to_delete.img_url)

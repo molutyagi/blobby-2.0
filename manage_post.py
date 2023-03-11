@@ -3,7 +3,7 @@ from only import admin_only
 from werkzeug.utils import secure_filename, send_from_directory
 from forms import CreatePostForm, CommentForm
 from flask import Flask, redirect, url_for, flash
-from flask_login import current_user
+from flask_login import current_user, login_required
 import os
 from db import BlogPost, db, Comment
 from flask import Blueprint
@@ -11,7 +11,7 @@ from flask import render_template
 from datetime import date
 
 app = Flask(__name__)
-UPLOAD_BLOG_IMG = "dynamic/uploads/blog_img"
+UPLOAD_BLOG_IMG = "dynamic/blog_img"
 app.config['UPLOAD_BLOG_IMG'] = UPLOAD_BLOG_IMG
 
 post_bp = Blueprint('post_bp', __name__)
@@ -26,6 +26,7 @@ def uploaded_file(filename):
 
 
 @post_bp.route("/post/<int:post_id>", methods=["GET", "POST"])
+@login_required
 def show_post(post_id):
     if current_user.is_authenticated:
         requested_post = BlogPost.query.get_or_404(post_id)
@@ -52,7 +53,7 @@ def show_post(post_id):
 
 
 @post_bp.route("/new-post", methods=["GET", "POST"])
-@admin_only
+@login_required
 def add_new_post():
     form = CreatePostForm()
     if form.validate_on_submit():
@@ -74,7 +75,7 @@ def add_new_post():
 
 
 @post_bp.route("/edit-post/<int:post_id>", methods=["GET", "POST"])
-@admin_only
+@login_required
 def edit_post(post_id):
     post = BlogPost.query.get_or_404(post_id)
     edit_form = CreatePostForm(
@@ -103,7 +104,7 @@ def edit_post(post_id):
 
 
 @post_bp.route("/delete/<int:post_id>", methods=["GET", "POST"])
-@admin_only
+@login_required
 def delete_post(post_id):
     post_to_delete = BlogPost.query.get_or_404(post_id)
     file_path = os.path.join(UPLOAD_BLOG_IMG, post_to_delete.img_url)
