@@ -33,21 +33,29 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-md-10 mx-auto">
-                {% if user.about %}{{ user.about|safe }} <hr> {% endif %}
+                {% if user.about %}
+                <h2 class="post-title">{% if user.id == current_user.id and user.about %}About {% else
+                    %}About Author {% endif %}</h2>
+                {{ user.about|safe }}
+                {% endif %}
+
+                {% if current_user.id == user.id %}
+                <div class="clearfix">
+                    <a class="btn btn-primary float-right"
+                       href="{{url_for('user_bp.edit_user', user_id=current_user.id)}}">Edit Profile</a>
+                </div>
+                {% endif %}
             </div>
         </div>
+
     </div>
+    {% if user.about %}
+    <hr>
+    {% endif %}
+
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-md-10 mx-auto">
-                <div class="clearfix">
-                    {% if current_user.id == user.id %}
-                    <a class="btn btn-primary float-right"
-                       href="{{url_for('user_bp.edit_user', user_id=current_user.id)}}">Edit
-                        Profile
-                    </a>
-                    {% endif %}
-                </div>
                 {% with messages = get_flashed_messages() %}
                 {% if messages %}
                 {% for message in messages %}
@@ -55,6 +63,8 @@
                 {% endfor %}
                 {% endif %}
                 {% endwith %}
+                <h1 class="post-title">{% if user.id == current_user.id %}Your Blogs
+                    {% else%}{{ user.name}}'s Blogs {% endif %}</h1>
                 {% for post in all_posts %}
                 <div class="post-preview">
                     <a href="{{ url_for('show_post', post_id=post.id) }}">
@@ -69,14 +79,20 @@
                         <a href="#">{{post.author.name}}</a>
                         on {{post.date}}
                         {% if current_user.id in [1,2,3] or current_user.id == user.id %}
-                        <a href="{{url_for('delete_post', post_id=post.id) }}">✘</a>
+                        <a href="{{url_for('user_bp.delete_post', post_id=post.id) }}">✘</a>
                         {% endif %}
                     </p>
                 </div>
                 <hr>
                 {% endfor %}
+                {% if current_user.id == user.id %}
+                <div class="clearfix">
+                    <a class="btn btn-primary float-right" href="{{url_for('add_new_post')}}">Create New Post</a>
+                </div>
+                {% endif %}
             </div>
         </div>
+
     </div>
 </main>
 

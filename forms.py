@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField
-from flask_wtf.file import FileField, FileRequired
+from flask_wtf.file import FileField
 from wtforms.validators import DataRequired
 from flask_ckeditor import CKEditorField
 
@@ -10,7 +10,7 @@ class CreatePostForm(FlaskForm):
     title = StringField("Blog Post Title", validators=[DataRequired()])
     subtitle = StringField("Subtitle", validators=[DataRequired()])
     # img_url = StringField("Blog Image URL", validators=[DataRequired(), URL()])
-    img_url = FileField(validators=[FileRequired()])
+    img_url = FileField("Blog Image")
     body = CKEditorField("Blog Content", validators=[DataRequired()])
     submit = SubmitField("Submit Post")
 
@@ -40,3 +40,8 @@ class UserDetails(FlaskForm):
     wall = FileField("Wall Image")
     about = CKEditorField("About Yourself")
     submit = SubmitField("Update Details")
+
+
+class SearchForm(FlaskForm):
+    searched = StringField("Searched", validators=[DataRequired()])
+    submit = SubmitField("Submit")

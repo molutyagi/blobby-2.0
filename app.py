@@ -8,13 +8,17 @@ from datetime import date
 from flask_login import LoginManager, current_user, login_required
 from flask_gravatar import Gravatar
 import secrets
-# from flask_session import Session
+
+from requests import post
+
+from flask_session import Session
 from db import User, BlogPost, db, Comment
-from forms import CommentForm, CreatePostForm
+from forms import CommentForm, CreatePostForm, SearchForm
 from functions import delete_file, img_to_uuid
 from log_reg import log_bp
 from others import others_bp
 from manage_user import user_bp
+
 # from manage_post import post_bp
 
 app = Flask(__name__)
@@ -79,15 +83,35 @@ gravatar = Gravatar(app,
                     base_url=None)
 year = date.today().year
 
+
 @app.route('/')
 def get_all_posts():
     posts = BlogPost.query.all()
     return render_template("index.html", all_posts=posts, logged_in=current_user.is_authenticated, year=year)
 
 
+# @app.route('/search', methods=["POST"])
+# def search():
+#     form = SearchForm()
+#     posts = BlogPost.query
+#     if form.validate_on_submit():
+#         # Get data from submitted form
+#         post.searched = form.searched.data
+#         # Query the Database
+#         posts = posts.filter(BlogPost.content.like('%' + post.searched + '%'))
+#         posts = posts.order_by(BlogPost.title).all()
+#
+#         return render_template("search.html",
+#                                form=form,
+#                                searched=post.searched,
+#                                posts=posts)
+
+
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_BLOG_IMG'], filename)
+
+
 #
 #
 @app.route("/post/<int:post_id>", methods=["GET", "POST"])
