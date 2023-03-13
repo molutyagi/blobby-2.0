@@ -47,11 +47,8 @@
                 {% endif %}
             </div>
         </div>
-
+        <hr>
     </div>
-    {% if user.about %}
-    <hr>
-    {% endif %}
 
     <div class="container">
         <div class="row">
@@ -63,8 +60,10 @@
                 {% endfor %}
                 {% endif %}
                 {% endwith %}
+                {% if post %}
                 <h1 class="post-title">{% if user.id == current_user.id %}Your Blogs
                     {% else%}{{ user.name}}'s Blogs {% endif %}</h1>
+                {% endif %}
                 {% for post in all_posts %}
                 <div class="post-preview">
                     <a href="{{ url_for('show_post', post_id=post.id) }}">
@@ -78,8 +77,8 @@
                     <p class="post-meta">Posted by
                         <a href="#">{{post.author.name}}</a>
                         on {{post.date}}
-                        {% if current_user.id in [1,2,3] or current_user.id == user.id %}
-                        <a href="{{url_for('user_bp.delete_post', post_id=post.id) }}">✘</a>
+                        {% if current_user.id in auth_users or current_user.id == user.id %}
+                        <a href="{{url_for('delete_post', post_id=post.id) }}">✘</a>
                         {% endif %}
                     </p>
                 </div>

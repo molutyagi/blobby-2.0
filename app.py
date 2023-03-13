@@ -1,6 +1,7 @@
 import os
 from functools import wraps
 
+from dotenv import load_dotenv
 from flask import Flask, render_template, redirect, url_for, flash, abort, send_from_directory
 from flask_bootstrap import Bootstrap
 from flask_ckeditor import CKEditor
@@ -9,7 +10,7 @@ from flask_login import LoginManager, current_user, login_required
 from flask_gravatar import Gravatar
 import secrets
 
-from requests import post
+# from requests import post
 
 from flask_session import Session
 from db import User, BlogPost, db, Comment
@@ -27,9 +28,7 @@ app.config['SECRET_KEY'] = secrets.token_hex(16)
 
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
-# Session(app)
-
-print("Hello world")
+Session(app)
 
 ckeditor = CKEditor(app)
 Bootstrap(app)
@@ -50,6 +49,10 @@ with app.app_context():
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+# load_dotenv()
+# auth_users = (os.getenv('AUTH_USERS'))
+auth_users = [1, 2, 3]
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -59,7 +62,6 @@ def load_user(user_id):
 def admin_only(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        auth_users = [1, 2, 3]
         if current_user.id not in auth_users:
             return abort(403)
         return f(*args, **kwargs)
@@ -87,7 +89,8 @@ year = date.today().year
 @app.route('/')
 def get_all_posts():
     posts = BlogPost.query.all()
-    return render_template("index.html", all_posts=posts, logged_in=current_user.is_authenticated, year=year)
+    return render_template("index.html", all_posts=posts, logged_in=current_user.is_authenticated, year=year,
+                           auth_users=auth_users)
 
 
 # @app.route('/search', methods=["POST"])
@@ -95,15 +98,13 @@ def get_all_posts():
 #     form = SearchForm()
 #     posts = BlogPost.query
 #     if form.validate_on_submit():
-#         # Get data from submitted form
-#         post.searched = form.searched.data
-#         # Query the Database
-#         posts = posts.filter(BlogPost.content.like('%' + post.searched + '%'))
+#         searched = form.searched.data
+#         posts = posts.filter(BlogPost.content.like('%' + searched + '%'))
 #         posts = posts.order_by(BlogPost.title).all()
 #
 #         return render_template("search.html",
 #                                form=form,
-#                                searched=post.searched,
+#                                searched=searched,
 #                                posts=posts)
 
 
@@ -112,10 +113,8 @@ def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_BLOG_IMG'], filename)
 
 
-#
-#
 @app.route("/post/<int:post_id>", methods=["GET", "POST"])
-@login_required
+# @login_required
 def show_post(post_id):
     if current_user.is_authenticated:
         requested_post = BlogPost.query.get_or_404(post_id)
@@ -186,17 +185,18 @@ def edit_post(post_id):
         db.session.commit()
 
         delete_file(file_path)
-        return redirect(url_for("show_post", post_id=post.id))
+        return redirect(url_for("show_post", post_id=post_id))
 
     return render_template("make-post.html", form=edit_form, year=year)
 
 
-@app.route("/delete/<int:post_id>", methods=["GET", "POST"])
+@app.route("/delete_post/<int:post_id>", methods=["GET", "POST"])
 @login_required
 def delete_post(post_id):
     post_to_delete = BlogPost.query.get_or_404(post_id)
     file_path = os.path.join(UPLOAD_BLOG_IMG, post_to_delete.img_url)
     try:
+        Comment.query.filter_by(post_id=post_id).delete()
         db.session.delete(post_to_delete)
         db.session.commit()
         delete_file(file_path)

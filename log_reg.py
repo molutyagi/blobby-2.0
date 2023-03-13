@@ -17,7 +17,7 @@ def register():
     if form.validate_on_submit():
         if User.query.filter_by(email=form.email.data).first():
             flash("You've already signed up with that email, login instead!")
-            return redirect(url_for('login'))
+            return redirect(url_for('log_reg.login'))
         if form.password.data != form.confirm_password.data:
             flash("Password does not match. Try again.")
             return redirect(url_for('log_reg.register'))
