@@ -1,7 +1,5 @@
 import os
 from functools import wraps
-
-from dotenv import load_dotenv
 from flask import Flask, render_template, redirect, url_for, flash, abort, send_from_directory
 from flask_bootstrap import Bootstrap
 from flask_ckeditor import CKEditor
@@ -9,9 +7,6 @@ from datetime import date
 from flask_login import LoginManager, current_user, login_required
 from flask_gravatar import Gravatar
 import secrets
-
-# from requests import post
-
 from flask_session import Session
 from db import User, BlogPost, db, Comment
 from forms import CommentForm, CreatePostForm, SearchForm
@@ -19,8 +14,8 @@ from functions import delete_file, img_to_uuid
 from log_reg import log_bp
 from others import others_bp
 from manage_user import user_bp
-
 # from manage_post import post_bp
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 app.app_context().push()
@@ -205,6 +200,17 @@ def delete_post(post_id):
     except:
         flash("Whoops!! There was a problem deleting that post.")
         return redirect(url_for('get_all_posts'))
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("404.html"), 404
+
+
+# Internal Server Error
+@app.errorhandler(500)
+def page_not_found(e):
+    return render_template("500.html"), 500
 
 
 if __name__ == "__main__":
