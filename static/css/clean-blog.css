@@ -520,3 +520,7 @@ footer .copyright {
   border-radius: 50%;
   background-color: #ccc;
 }
+
+.flash-msg {
+  color: 'red';
+}

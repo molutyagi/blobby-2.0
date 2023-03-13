@@ -1,8 +1,13 @@
-@app.errorhandler(404)
-def page_not_found(e):
-	return render_template("404.html"), 404
+from flask import Blueprint, render_template
 
-# Internal Server Error
-@app.errorhandler(500)
+handle_error_bp = Blueprint('error_bp', __name__)
+
+
+@handle_error_bp.errorhandler(404)
 def page_not_found(e):
-	return render_template("500.html"), 500
+    return render_template("404.html"), 404
+
+
+@handle_error_bp.errorhandler(500)
+def page_not_found(e):
+    return render_template("500.html"), 500

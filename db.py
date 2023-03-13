@@ -1,9 +1,15 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin
-
+from flask import Flask
 
 db = SQLAlchemy()
+
+# app = Flask(__name__)
+
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///blogs.db'
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+
 
 class User(UserMixin, db.Model):
     __tablename__ = "users"
@@ -27,7 +33,7 @@ class BlogPost(db.Model):
     subtitle = db.Column(db.String(250), nullable=False)
     date = db.Column(db.String(250), nullable=False)
     body = db.Column(db.Text, nullable=False)
-    img_url = db.Column(db.String, nullable=False)
+    img_url = db.Column(db.String, nullable=True)
 
     comments = relationship("Comment", back_populates="parent_post")
 
@@ -43,4 +49,6 @@ class Comment(db.Model):
     text = db.Column(db.Text, nullable=False)
 
 
-# db.create_all()
+# db.init_app(app)
+# with app.app_context():
+#     db.create_all()

@@ -7,7 +7,7 @@
 
 <!-- Page Header -->
 <header class="masthead"
-        style="background-image: url('{% if user.wall %}{{ url_for('user_bp.wall_img', filename=user.wall) }}{% else %}{{ url_for('static', filename='img/default_profile/def_wall.jpg') }}{% endif %}'); height:70vh">
+        style="background-image: url('{% if user.wall %}{{ url_for('user_bp.wall_img', filename=user.wall) }}{% else %}{{ url_for('static', filename='img/default_profile/def_wall.jpg') }}{% endif %}'); height:73vh">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/clean-blog.css') }}">
     <div class="overlay"></div>
     <div class="container">
@@ -44,26 +44,33 @@
                     <a class="btn btn-primary float-right"
                        href="{{url_for('user_bp.edit_user', user_id=current_user.id)}}">Edit Profile</a>
                 </div>
+                {% if not current_user.about %}
+                <hr>
+                {% endif %}
+                {% endif %}
+                {% if user.about %}
+                <hr>
                 {% endif %}
             </div>
         </div>
-        <hr>
     </div>
 
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-md-10 mx-auto">
+
                 {% with messages = get_flashed_messages() %}
                 {% if messages %}
                 {% for message in messages %}
-                <p>{{ message }}</p>
+                <p style="color:red">{{ message }}</p>
                 {% endfor %}
                 {% endif %}
                 {% endwith %}
-                {% if post %}
+
+                <!--            {% if all_posts %}-->
                 <h1 class="post-title">{% if user.id == current_user.id %}Your Blogs
                     {% else%}{{ user.name}}'s Blogs {% endif %}</h1>
-                {% endif %}
+                <!--            {% endif %}-->
                 {% for post in all_posts %}
                 <div class="post-preview">
                     <a href="{{ url_for('show_post', post_id=post.id) }}">

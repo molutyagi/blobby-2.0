@@ -112,23 +112,30 @@ def wall_img(filename):
 #         return redirect(url_for('get_all_posts'))
 
 
-
 @user_bp.route("/delete_user/<int:user_id>", methods=["GET", "POST"])
 @login_required
 def delete_user(user_id):
     user_to_delete = User.query.get_or_404(user_id)
-    profile_path = os.path.join(UPLOAD_USER_IMG, user_to_delete.profile)
-    wall_path = os.path.join(UPLOAD_USER_IMG, user_to_delete.wall)
+    if user_to_delete.profile:
+        profile_path = os.path.join(UPLOAD_USER_IMG, user_to_delete.profile)
+        delete_file(profile_path)
+
+    if user_to_delete.wall:
+        wall_path = os.path.join(UPLOAD_USER_IMG, user_to_delete.wall)
+        delete_file(wall_path)
+
     try:
         for post in user_to_delete.posts:
+            print("for s")
             delete_post = current_app.view_functions['delete_post']
             with current_app.test_request_context():
                 delete_post(post_id=post.id)
+            print("for e")
 
+        print("reach cmt")
         Comment.query.filter_by(author_id=user_id).delete()
+        print("reach lgout")
 
-        delete_file(profile_path)
-        delete_file(wall_path)
         logout_user()
         db.session.delete(user_to_delete)
         db.session.commit()

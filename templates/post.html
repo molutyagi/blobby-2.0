@@ -1,11 +1,12 @@
-{% include "header.html" %}
+{% extends 'bootstrap/base.html' %}
 {% import "bootstrap/wtf.html" as wtf %}
+
 {% block content %}
 {% include "header.html" %}
 
 <!-- Page Header -->
 <header class="masthead"
-        style="background-image: url('{{ url_for('uploaded_file', filename=post.img_url.split('/')[-1])}}')">
+        style="background-image: url('{% if post.img_url %}{{ url_for('uploaded_file', filename=post.img_url.split('/')[-1])}}{% else %}{{ url_for('static', filename='img/default_profile/def_wall.jpg') }}{% endif %}'); height:73vh">
     <div class="overlay"></div>
     <div class="container">
         <div class="row">
@@ -27,6 +28,15 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-md-10 mx-auto">
+
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                {% for message in messages %}
+                <p style="color:red">{{ message }}</p>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+
                 {{ post.body|safe }}
 
                 {% if current_user.id == post.author.id %}
@@ -52,7 +62,9 @@
                             <div class="commentText">
                                 {{comment.text|safe}}
                                 <span class="date sub-text">{{comment.comment_author.name}}</span>
-
+                                {% if current_user.id in auth_users or current_user.id == comment.author_id %}
+                                <a href="{{url_for('delete_cmt', cmt_id=comment.id) }}">✘</a>
+                                {% endif %}
                             </div>
                         </li>
                     </ul>
