@@ -14,6 +14,7 @@ from functions import delete_file, img_to_uuid
 from log_reg import log_bp
 from others import others_bp
 from manage_user import user_bp
+# from handle_error import handle_error_bp
 # from manage_post import post_bp
 from dotenv import load_dotenv
 
@@ -67,6 +68,7 @@ def admin_only(f):
 app.register_blueprint(log_bp)
 app.register_blueprint(others_bp)
 app.register_blueprint(user_bp)
+# app.register_blueprint(handle_error_bp)
 # app.register_blueprint(post_bp)
 
 
@@ -207,11 +209,11 @@ def page_not_found(e):
     return render_template("404.html"), 404
 
 
-# Internal Server Error
 @app.errorhandler(500)
 def page_not_found(e):
     return render_template("500.html"), 500
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True)
+# serve(app, host='0.0.0.0', port=80, threads=1)
