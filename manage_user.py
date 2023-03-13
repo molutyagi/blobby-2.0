@@ -1,8 +1,8 @@
-from flask import Flask, redirect, url_for, flash, send_from_directory
+from flask import Flask, redirect, url_for, flash, send_from_directory, current_app
 from flask_login import current_user, login_required
 from forms import UserDetails
 import os
-from db import User, BlogPost, db
+from db import User, BlogPost, db, Comment
 from functions import img_to_uuid, delete_file
 from flask import Blueprint
 from flask import render_template
@@ -68,6 +68,15 @@ def edit_user(user_id):
     return render_template("edit-user.html", year=year, user=user, current_user=current_user, form=form)
 
 
+# @user_bp.route('/profile_img/<user_id>')
+# def profile_img(user_id):
+#     user = User.query.get_or_404(user_id)
+#     filenames = [user.profile, user.wall]
+#     file_list = []
+#     for filename in filenames:
+#         file_list.append(send_from_directory(app.config['UPLOAD_USER_IMG'], filename))
+#     return file_list
+
 @user_bp.route('/profile_img/<filename>')
 def profile_img(filename):
     return send_from_directory(app.config['UPLOAD_USER_IMG'], filename)
@@ -78,20 +87,54 @@ def wall_img(filename):
     return send_from_directory(app.config['UPLOAD_USER_IMG'], filename)
 
 
-@user_bp.route("/delete/<int:user_id>", methods=["GET", "POST"])
+# @user_bp.route("/delete_user/<int:user_id>", methods=["GET", "POST"])
+# @login_required
+# def delete_user(user_id):
+#     user_to_delete = User.query.get_or_404(user_id)
+#     # posts_to_delete = BlogPost.query.filter_by(author_id=user_id).all()
+#     # comments_to_delete = Comment.query.filter_by(author_id=user_id).all()
+#     profile_path = os.path.join(UPLOAD_USER_IMG, user_to_delete.profile)
+#     wall_path = os.path.join(UPLOAD_USER_IMG, user_to_delete.wall)
+#     try:
+#         delete_file(profile_path)
+#         delete_file(wall_path)
+#         post_to_delete = BlogPost.query.filter_by(author_id=user_id).delete()
+#         Comment.query.filter_by(author_id=user_id).delete()
+#         print(post_to_delete)
+#         logout_user()
+#         db.session.delete(user_to_delete)
+#
+#         db.session.commit()
+#         flash("User was deleted.")
+#         return redirect(url_for('get_all_posts'))
+#     except:
+#         flash("Whoops!! There was a problem deleting user.")
+#         return redirect(url_for('get_all_posts'))
+
+
+
+@user_bp.route("/delete_user/<int:user_id>", methods=["GET", "POST"])
 @login_required
 def delete_user(user_id):
     user_to_delete = User.query.get_or_404(user_id)
     profile_path = os.path.join(UPLOAD_USER_IMG, user_to_delete.profile)
     wall_path = os.path.join(UPLOAD_USER_IMG, user_to_delete.wall)
     try:
+        for post in user_to_delete.posts:
+            delete_post = current_app.view_functions['delete_post']
+            with current_app.test_request_context():
+                delete_post(post_id=post.id)
+
+        Comment.query.filter_by(author_id=user_id).delete()
+
         delete_file(profile_path)
         delete_file(wall_path)
         logout_user()
         db.session.delete(user_to_delete)
         db.session.commit()
+
         flash("User was deleted.")
         return redirect(url_for('get_all_posts'))
     except:
-        flash("Whoops!! There was a problem deleting that post.")
+        flash("Whoops!! There was a problem deleting user.")
         return redirect(url_for('get_all_posts'))

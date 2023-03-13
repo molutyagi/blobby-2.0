@@ -40,7 +40,7 @@
                 <p class="post-meta">Posted by
                     <a href="{{url_for('user_bp.profile', user_id=post.author.id) }}">{{post.author.name}}</a>
                     on {{post.date}}
-                    {% if current_user.id == post.author.id or current_user.id in [1,2,3] %}
+                    {% if current_user.id == post.author.id or current_user.id in auth_users %}
                     <a href="{{url_for('delete_post', post_id=post.id) }}">✘</a>
                     {% endif %}
                 </p>
