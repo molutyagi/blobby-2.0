@@ -104,11 +104,15 @@ def delete_user(user_id):
 
     try:
         for post in user_to_delete.posts:
+            print("for s")
             delete_post = current_app.view_functions['delete_post']
             with current_app.test_request_context():
                 delete_post(post_id=post.id)
+            print("for e")
 
+        print("reach cmt")
         Comment.query.filter_by(author_id=user_id).delete()
+        print("reach lgout")
 
         logout_user()
         db.session.delete(user_to_delete)
