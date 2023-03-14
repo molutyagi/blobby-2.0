@@ -171,40 +171,6 @@ def add_new_post():
             app.logger.error(str(e))
             form.errors['submit'] = 'Failed to create new post.'
     return render_template("make-post.html", form=form)
-#
-# @app.route("/new-post", methods=["GET", "POST"])
-# @login_required
-# def add_new_post():
-#     form = CreatePostForm()
-#     img_url = None
-#     if form.validate_on_submit():
-#         if form.img_url.data:
-#             img = form.img_url
-#             img_id = img_to_uuid(img)
-#             img.data.save(os.path.join(app.config['UPLOAD_BLOG_IMG'], img_id))
-#             img_url = img_id
-#         else:
-#             img_url = None
-#
-#     if form.validate_on_submit():
-#         try:
-#             new_post = BlogPost(
-#                 title=form.title.data,
-#                 subtitle=form.subtitle.data,
-#                 body=form.body.data,
-#                 img_url=img_url,
-#                 author=current_user,
-#                 date=datetime.now().strftime("%B %d, %Y %I:%M %p")
-#             )
-#             db.session.add(new_post)
-#             db.session.commit()
-#             return redirect(url_for("get_all_posts"))
-#         except Exception as e:
-#             db.session.rollback()
-#             app.logger.error(str(e))
-#             form.errors['submit'] = 'Failed to create new post.'
-#
-#     return render_template("make-post.html", form=form)
 
 
 @app.route("/edit-post/<int:post_id>", methods=["GET", "POST"])
