@@ -18,6 +18,8 @@ from manage_user import user_bp
 # from manage_post import post_bp
 from dotenv import load_dotenv
 
+load_dotenv()
+
 app = Flask(__name__)
 app.app_context().push()
 app.config['SECRET_KEY'] = secrets.token_hex(16)
@@ -31,7 +33,6 @@ Bootstrap(app)
 
 # CONNECT TO DB
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///blog.db'
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///blogs.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 UPLOAD_USER_IMG = "dynamic/profile_pic"
 app.config['UPLOAD_USER_IMG'] = UPLOAD_USER_IMG
@@ -46,9 +47,14 @@ with app.app_context():
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-# load_dotenv()
-# auth_users = (os.getenv('AUTH_USERS'))
-auth_users = [1, 2, 3]
+auth_users = (os.getenv('AUTH_USERS'))
+auth_users_list = auth_users.split(',')
+auth_users = list(map(int, auth_users_list))
+
+
+@app.context_processor
+def inject_vars():
+    return dict(auth_users=auth_users)
 
 
 @login_manager.user_loader
@@ -87,8 +93,7 @@ year = date.today().year
 @app.route('/')
 def get_all_posts():
     posts = BlogPost.query.all()
-    return render_template("index.html", all_posts=posts, logged_in=current_user.is_authenticated, year=year,
-                           auth_users=auth_users)
+    return render_template("index.html", all_posts=posts, logged_in=current_user.is_authenticated, year=year)
 
 
 # @app.route('/search', methods=["POST"])
@@ -133,7 +138,7 @@ def show_post(post_id):
             img_url = url_for('uploaded_file', filename=requested_post.img_url)
 
         return render_template("post.html", post=requested_post, form=form, current_user=current_user, img_url=img_url,
-                               year=year, auth_users=auth_users)
+                               year=year, )
     flash("You're not logged-in. Kindly Log-in")
     return redirect(url_for('get_all_posts'))
 
