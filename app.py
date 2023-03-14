@@ -1,25 +1,22 @@
 import os
-import secrets
-from datetime import date
 from functools import wraps
-
-from flask import Flask, render_template, redirect, url_for, flash, abort, send_from_directory, current_app
+from flask import Flask, render_template, redirect, url_for, flash, abort, send_from_directory
 from flask_bootstrap import Bootstrap
 from flask_ckeditor import CKEditor
-from flask_gravatar import Gravatar
+from datetime import date, datetime
 from flask_login import LoginManager, current_user, login_required
-
-from db import User, BlogPost, db, Comment
+from flask_gravatar import Gravatar
+import secrets
 from flask_session import Session
-from forms import CommentForm, CreatePostForm
+from db import User, BlogPost, db, Comment
+from forms import CommentForm, CreatePostForm, SearchForm
 from functions import delete_file, img_to_uuid
 from log_reg import log_bp
-from manage_user import user_bp
 from others import others_bp
-from modify_db import modify_db
-
+from manage_user import user_bp
 # from handle_error import handle_error_bp
 # from manage_post import post_bp
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 app.app_context().push()
@@ -35,8 +32,7 @@ Bootstrap(app)
 # CONNECT TO DB
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///blog.db'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///blogs.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
-
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 UPLOAD_USER_IMG = "dynamic/profile_pic"
 app.config['UPLOAD_USER_IMG'] = UPLOAD_USER_IMG
 UPLOAD_BLOG_IMG = "dynamic/blog_img"
@@ -52,12 +48,12 @@ login_manager.init_app(app)
 
 # load_dotenv()
 # auth_users = (os.getenv('AUTH_USERS'))
-auth_users = [1, 2]
+auth_users = [1, 2, 3]
 
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get_or_404(user_id)
+    return User.query.get_or_404(int(user_id))
 
 
 def admin_only(f):
@@ -91,7 +87,6 @@ year = date.today().year
 @app.route('/')
 def get_all_posts():
     posts = BlogPost.query.all()
-    # modify_db()
     return render_template("index.html", all_posts=posts, logged_in=current_user.is_authenticated, year=year,
                            auth_users=auth_users)
 
@@ -121,7 +116,6 @@ def uploaded_file(filename):
 def show_post(post_id):
     if current_user.is_authenticated:
         requested_post = BlogPost.query.get_or_404(post_id)
-        # all_comments = Comment.query.filter_by(post_id=requested_post.id).all()
         form = CommentForm()
         if form.validate_on_submit():
             if not current_user.id:
@@ -133,13 +127,13 @@ def show_post(post_id):
             )
             db.session.add(new_comment)
             db.session.commit()
-            return redirect(url_for('show_post', post_id=post_id))
+            return redirect(url_for('show_post', post_id=requested_post.id))
         img_url = None
         if requested_post.img_url:
             img_url = url_for('uploaded_file', filename=requested_post.img_url)
 
         return render_template("post.html", post=requested_post, form=form, current_user=current_user, img_url=img_url,
-                               year=year, )
+                               year=year, auth_users=auth_users)
     flash("You're not logged-in. Kindly Log-in")
     return redirect(url_for('get_all_posts'))
 
@@ -148,45 +142,79 @@ def show_post(post_id):
 @login_required
 def add_new_post():
     form = CreatePostForm()
+    img_url = None
     if form.validate_on_submit():
-        print("valid")
         if form.img_url.data:
             img = form.img_url
             img_id = img_to_uuid(img)
             img.data.save(os.path.join(app.config['UPLOAD_BLOG_IMG'], img_id))
+            img_url = img_id
+
+        try:
+            print("try")
             new_post = BlogPost(
                 title=form.title.data,
                 subtitle=form.subtitle.data,
                 body=form.body.data,
-                img_url=img_id,
+                img_url=img_url,
                 author=current_user,
-                date=date.today().strftime("%B %d, %Y")
+                date=datetime.now().strftime("%B %d, %Y %I:%M %p")
             )
+            print("new post")
             db.session.add(new_post)
+            print("added")
             db.session.commit()
-            print("form")
-        else:
-            print("else")
-            new_post = BlogPost(
-                title=form.title.data,
-                subtitle=form.subtitle.data,
-                body=form.body.data,
-                img_url=None,
-                author=current_user,
-                date=date.today().strftime("%B %d, %Y")
-            )
-            db.session.add(new_post)
-            db.session.commit()
-        return redirect(url_for("get_all_posts"))
-    return render_template("make-post.html", form=form, year=year)
+            print("commit")
+            return redirect(url_for("get_all_posts"))
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(str(e))
+            form.errors['submit'] = 'Failed to create new post.'
+    return render_template("make-post.html", form=form)
+#
+# @app.route("/new-post", methods=["GET", "POST"])
+# @login_required
+# def add_new_post():
+#     form = CreatePostForm()
+#     img_url = None
+#     if form.validate_on_submit():
+#         if form.img_url.data:
+#             img = form.img_url
+#             img_id = img_to_uuid(img)
+#             img.data.save(os.path.join(app.config['UPLOAD_BLOG_IMG'], img_id))
+#             img_url = img_id
+#         else:
+#             img_url = None
+#
+#     if form.validate_on_submit():
+#         try:
+#             new_post = BlogPost(
+#                 title=form.title.data,
+#                 subtitle=form.subtitle.data,
+#                 body=form.body.data,
+#                 img_url=img_url,
+#                 author=current_user,
+#                 date=datetime.now().strftime("%B %d, %Y %I:%M %p")
+#             )
+#             db.session.add(new_post)
+#             db.session.commit()
+#             return redirect(url_for("get_all_posts"))
+#         except Exception as e:
+#             db.session.rollback()
+#             app.logger.error(str(e))
+#             form.errors['submit'] = 'Failed to create new post.'
+#
+#     return render_template("make-post.html", form=form)
 
 
 @app.route("/edit-post/<int:post_id>", methods=["GET", "POST"])
 @login_required
 def edit_post(post_id):
     post = BlogPost.query.get_or_404(post_id)
-    file_path = os.path.join(UPLOAD_BLOG_IMG, post.img_url) if post.img_url else None
-
+    file_path = None
+    img_id = None
+    if post.img_url:
+        file_path = os.path.join(UPLOAD_BLOG_IMG, post.img_url)
     edit_form = CreatePostForm(
         title=post.title,
         subtitle=post.subtitle,
@@ -195,23 +223,23 @@ def edit_post(post_id):
         body=post.body
     )
     if edit_form.validate_on_submit():
-
-        post.title = edit_form.title.data
-        post.subtitle = edit_form.subtitle.data
-        post.body = edit_form.body.data
-
         if edit_form.img_url:
             img = edit_form.img_url
             img_id = img_to_uuid(img)
             img.data.save(os.path.join(app.config['UPLOAD_BLOG_IMG'], img_id))
+        try:
+            post.title = edit_form.title.data
+            post.subtitle = edit_form.subtitle.data
             post.img_url = img_id
-
-            if file_path:
+            post.body = edit_form.body.data
+            db.session.commit()
+            if file_path and img_id:
                 delete_file(file_path)
-
-        db.session.commit()
-
-        return redirect(url_for("show_post", post_id=post_id))
+            return redirect(url_for("show_post", post_id=post_id))
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(str(e))
+            edit_form.errors['submit'] = 'Failed to create new post.'
 
     return render_template("make-post.html", form=edit_form, year=year)
 
@@ -220,12 +248,15 @@ def edit_post(post_id):
 @login_required
 def delete_post(post_id):
     post_to_delete = BlogPost.query.get_or_404(post_id)
-    file_path = os.path.join(UPLOAD_BLOG_IMG, post_to_delete.img_url)
+    file_path = None
+    if post_to_delete.img_url:
+        file_path = os.path.join(UPLOAD_BLOG_IMG, post_to_delete.img_url)
     try:
         Comment.query.filter_by(post_id=post_id).delete()
         db.session.delete(post_to_delete)
         db.session.commit()
-        delete_file(file_path)
+        if post_to_delete.img_url:
+            delete_file(file_path)
         flash("Blog post was deleted.")
         return redirect(url_for('get_all_posts'))
     except:
@@ -255,7 +286,7 @@ def page_not_found(e):
 
 @app.errorhandler(500)
 def page_not_found(e):
-    return render_template("500.html"), 500 @ app.errorhandler(404)
+    return render_template("500.html"), 500
 
 
 @app.errorhandler(401)

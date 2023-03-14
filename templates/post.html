@@ -6,7 +6,7 @@
 
 <!-- Page Header -->
 <header class="masthead"
-        style="background-image: url('{% if post.img_url %}{{ url_for('uploaded_file', filename=post.img_url.split('/')[-1])}}{% else %}{{ url_for('static', filename='img/default_profile/def_wall.jpg') }}{% endif %}'); height:73vh">
+        style="background-image: url('{% if post.img_url %}{{ url_for('uploaded_file', filename=post.img_url)}}{% else %}{{ url_for('static', filename='img/default_profile/def_wall.jpg') }}{% endif %}'); height:73vh">
     <div class="overlay"></div>
     <div class="container">
         <div class="row">
