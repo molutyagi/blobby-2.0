@@ -111,8 +111,6 @@ def edit_post(post_id):
             return redirect(url_for("post_bp.show_post", post_id=post_id))
         except Exception as e:
             db.session.rollback()
-            app.logger.error(str(e))
-            edit_form.errors['submit'] = 'Failed to create new post.'
 
     return render_template("make-post.html", form=edit_form, year=year)
 

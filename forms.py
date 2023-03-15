@@ -14,13 +14,13 @@ class CreatePostForm(FlaskForm):
     # img_url = StringField("Blog Image URL", validators=[DataRequired(), URL()])
     img_url = FileField("Blog Image")
     body = CKEditorField("Blog Content", validators=[DataRequired()])
+    post_id = HiddenField()
     submit = SubmitField("Submit Post")
-    # post_id = HiddenField()
 
-    # def validate_title(self, field):
-    #     post = BlogPost.query.filter_by(title=field.data).first()
-    #     if post and post.id != self.post_id:
-    #         raise ValidationError('Title already exists. Please choose a different one.')
+    def validate_title(self, field):
+        post = BlogPost.query.filter_by(title=field.data).first()
+        if post and str(post.id) != self.post_id.data:
+            raise ValidationError('Title already exists. Please choose a different one.')
 
 
 class RegisterForm(FlaskForm):
