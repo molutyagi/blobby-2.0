@@ -11,24 +11,20 @@ from datetime import date
 from log_reg import logout_user
 
 app = Flask(__name__)
-UPLOAD_USER_IMG = "dynamic/profile_pic"
+UPLOAD_USER_IMG = os.getenv('UPLOAD_USER_IMG')
 app.config['UPLOAD_USER_IMG'] = UPLOAD_USER_IMG
 
 user_bp = Blueprint('user_bp', __name__)
 
 year = date.today().year
-auth_users = [1, 2, 3]
 
 
 @user_bp.route("/profile/<int:user_id>", methods=["GET", "POST"])
 @login_required
 def profile(user_id):
     user = User.query.get_or_404(user_id)
-    # profile_img_url = url_for('user_bp.profile_img', filename=current_user.profile)
-    # wall_img_url = url_for('user_bp.wall_img', filename=current_user.wall)
     posts = BlogPost.query.filter_by(author_id=user_id).all()
-    return render_template("profile.html", year=year, current_user=current_user, all_posts=posts, user=user,
-                           auth_users=auth_users)
+    return render_template("profile.html", year=year, current_user=current_user, all_posts=posts, user=user)
 
 
 @user_bp.route("/edit_user/<int:user_id>", methods=["GET", "POST"])
@@ -71,15 +67,6 @@ def edit_user(user_id):
     return render_template("edit-user.html", year=year, user=user, current_user=current_user, form=form)
 
 
-# @user_bp.route('/profile_img/<user_id>')
-# def profile_img(user_id):
-#     user = User.query.get_or_404(user_id)
-#     filenames = [user.profile, user.wall]
-#     file_list = []
-#     for filename in filenames:
-#         file_list.append(send_from_directory(app.config['UPLOAD_USER_IMG'], filename))
-#     return file_list
-
 @user_bp.route('/profile_img/<filename>')
 def profile_img(filename):
     return send_from_directory(app.config['UPLOAD_USER_IMG'], filename)
@@ -94,18 +81,17 @@ def wall_img(filename):
 @login_required
 def delete_user(user_id):
     user_to_delete = User.query.get_or_404(user_id)
-    if user_to_delete.profile:
-        profile_path = os.path.join(UPLOAD_USER_IMG, user_to_delete.profile)
-        delete_file(profile_path)
-
-    if user_to_delete.wall:
-        wall_path = os.path.join(UPLOAD_USER_IMG, user_to_delete.wall)
-        delete_file(wall_path)
-
     try:
+        if user_to_delete.profile:
+            profile_path = os.path.join(UPLOAD_USER_IMG, user_to_delete.profile)
+            delete_file(profile_path)
+
+        if user_to_delete.wall:
+            wall_path = os.path.join(UPLOAD_USER_IMG, user_to_delete.wall)
+            delete_file(wall_path)
+
         for post in user_to_delete.posts:
-            print("for s")
-            delete_post = current_app.view_functions['delete_post']
+
             with current_app.test_request_context():
                 delete_post(post_id=post.id)
             print("for e")
@@ -120,6 +106,8 @@ def delete_user(user_id):
 
         flash("User was deleted.")
         return redirect(url_for('get_all_posts'))
-    except:
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(str(e))
         flash("Whoops!! There was a problem deleting user.")
         return redirect(url_for('get_all_posts'))

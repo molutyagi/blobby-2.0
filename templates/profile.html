@@ -24,7 +24,7 @@
                  style="background-image: url('{% if user.profile %}{{ url_for('user_bp.profile_img', filename=user.profile) }}{% else %}{{ url_for('static', filename='img/default_profile/def_user.png') }}{% endif %}')">
             </div>
         </div>
-        <h1>{{ user.name }}</h1>
+        <p><b>{{ user.name }}</b> (Admin)</p>
     </div>
 </header>
 
@@ -67,14 +67,11 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-md-10 mx-auto">
-
-                <!--            {% if all_posts %}-->
                 <h1 class="post-title">{% if user.id == current_user.id %}Your Blogs
                     {% else%}{{ user.name}}'s Blogs {% endif %}</h1>
-                <!--            {% endif %}-->
                 {% for post in all_posts %}
                 <div class="post-preview">
-                    <a href="{{ url_for('show_post', post_id=post.id) }}">
+                    <a href="{{ url_for('post_bp.show_post', post_id=post.id) }}">
                         <h2 class="post-title">
                             {{post.title}}
                         </h2>
@@ -85,8 +82,8 @@
                     <p class="post-meta">Posted by
                         <a href="#">{{post.author.name}}</a>
                         on {{post.date}}
-                    {% if current_user.id == user.id or current_user.id in auth_users %}
-                        <a href="{{url_for('delete_post', post_id=post.id) }}">✘</a>
+                        {% if current_user.id == user.id or current_user.id in auth_users %}
+                        <a href="{{url_for('post_bp.delete_post', post_id=post.id) }}">✘</a>
                         {% endif %}
                     </p>
                 </div>
@@ -94,7 +91,8 @@
                 {% endfor %}
                 {% if current_user.id == user.id %}
                 <div class="clearfix">
-                    <a class="btn btn-primary float-right" href="{{url_for('add_new_post')}}">Create New Post</a>
+                    <a class="btn btn-primary float-right" href="{{url_for('post_bp.add_new_post')}}">Create New
+                        Post</a>
                 </div>
                 {% endif %}
             </div>
