@@ -90,5 +90,7 @@ def get_all_posts():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
-# serve(app, host='0.0.0.0', port=80, threads=1)
+    app.run(host='0.0.0.0', port=5000)
+
+def application(env, start_response):
+    return app(env, start_response)
