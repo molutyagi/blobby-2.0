@@ -24,8 +24,8 @@ def page_not_found(e):
 def page_not_found(e):
     return render_template("403.html"), 403
 
-@error_bp.app_errorhandler(Exception)
-def general_exception(e):
-    print(e)
-    print(traceback.format_exc())
-    return render_template('error.html')
+# @error_bp.app_errorhandler(Exception)
+# def general_exception(e):
+#     print(e)
+#     print(traceback.format_exc())
+#     return render_template('error.html')

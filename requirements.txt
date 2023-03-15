@@ -28,3 +28,5 @@ tornado~=6.2
 setuptools==67.6.0
 packaging==23.0
 pyparsing~=3.0.9
+greenlet~=2.0.2
+python-dotenv~=1.0.0
