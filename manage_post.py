@@ -17,9 +17,11 @@ post_bp = Blueprint('post_bp', __name__)
 
 year = date.today().year
 
+
 @post_bp.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_BLOG_IMG'], filename)
+
 
 @post_bp.route("/post/<int:post_id>", methods=["GET", "POST"])
 # @login_required
