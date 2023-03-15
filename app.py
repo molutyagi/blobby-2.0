@@ -14,7 +14,7 @@ from functions import delete_file, img_to_uuid
 from log_reg import log_bp
 from others import others_bp
 from manage_user import user_bp
-# from handle_error import handle_error_bp
+from handle_error import error_bp
 # from manage_post import post_bp
 from dotenv import load_dotenv
 
@@ -32,7 +32,7 @@ ckeditor = CKEditor(app)
 Bootstrap(app)
 
 # CONNECT TO DB
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///blog.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 UPLOAD_USER_IMG = "dynamic/profile_pic"
 app.config['UPLOAD_USER_IMG'] = UPLOAD_USER_IMG
@@ -72,10 +72,10 @@ def admin_only(f):
     return decorated_function
 
 
+app.register_blueprint(error_bp)
 app.register_blueprint(log_bp)
 app.register_blueprint(others_bp)
 app.register_blueprint(user_bp)
-# app.register_blueprint(handle_error_bp)
 # app.register_blueprint(post_bp)
 
 
@@ -156,7 +156,6 @@ def add_new_post():
             img_url = img_id
 
         try:
-            print("try")
             new_post = BlogPost(
                 title=form.title.data,
                 subtitle=form.subtitle.data,
@@ -165,11 +164,8 @@ def add_new_post():
                 author=current_user,
                 date=datetime.now().strftime("%B %d, %Y %I:%M %p")
             )
-            print("new post")
             db.session.add(new_post)
-            print("added")
             db.session.commit()
-            print("commit")
             return redirect(url_for("get_all_posts"))
         except Exception as e:
             db.session.rollback()
@@ -230,7 +226,9 @@ def delete_post(post_id):
             delete_file(file_path)
         flash("Blog post was deleted.")
         return redirect(url_for('get_all_posts'))
-    except:
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(str(e))
         flash("Whoops!! There was a problem deleting that post.")
         return redirect(url_for('get_all_posts'))
 
@@ -248,26 +246,6 @@ def delete_cmt(cmt_id):
     except:
         flash("Whoops!! There was a problem deleting that comment.")
         return redirect(url_for('show_post', post_id=cmt_to_delete.post_id))
-
-
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template("404.html"), 404
-
-
-@app.errorhandler(500)
-def page_not_found(e):
-    return render_template("500.html"), 500
-
-
-@app.errorhandler(401)
-def page_not_found(e):
-    return render_template("401.html"), 401
-
-
-@app.errorhandler(403)
-def page_not_found(e):
-    return render_template("403.html"), 403
 
 
 if __name__ == "__main__":
