@@ -74,7 +74,7 @@
                 <!--            {% endif %}-->
                 {% for post in all_posts %}
                 <div class="post-preview">
-                    <a href="{{ url_for('show_post', post_id=post.id) }}">
+                    <a href="{{ url_for('post_bp.show_post', post_id=post.id) }}">
                         <h2 class="post-title">
                             {{post.title}}
                         </h2>
@@ -86,7 +86,7 @@
                         <a href="#">{{post.author.name}}</a>
                         on {{post.date}}
                     {% if current_user.id == user.id or current_user.id in auth_users %}
-                        <a href="{{url_for('delete_post', post_id=post.id) }}">✘</a>
+                        <a href="{{url_for('post_bp.delete_post', post_id=post.id) }}">✘</a>
                         {% endif %}
                     </p>
                 </div>
@@ -94,7 +94,7 @@
                 {% endfor %}
                 {% if current_user.id == user.id %}
                 <div class="clearfix">
-                    <a class="btn btn-primary float-right" href="{{url_for('add_new_post')}}">Create New Post</a>
+                    <a class="btn btn-primary float-right" href="{{url_for('post_bp.add_new_post')}}">Create New Post</a>
                 </div>
                 {% endif %}
             </div>

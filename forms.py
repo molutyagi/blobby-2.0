@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField
+from wtforms import StringField, SubmitField, PasswordField, HiddenField
 from flask_wtf.file import FileField
 from wtforms.validators import DataRequired, ValidationError
 from flask_ckeditor import CKEditorField
@@ -15,10 +15,12 @@ class CreatePostForm(FlaskForm):
     img_url = FileField("Blog Image")
     body = CKEditorField("Blog Content", validators=[DataRequired()])
     submit = SubmitField("Submit Post")
+    # post_id = HiddenField()
 
-    def validate_title(self, field):
-        if BlogPost.query.filter_by(title=field.data).first():
-            raise ValidationError('Title already exists. Please choose a different one.')
+    # def validate_title(self, field):
+    #     post = BlogPost.query.filter_by(title=field.data).first()
+    #     if post and post.id != self.post_id:
+    #         raise ValidationError('Title already exists. Please choose a different one.')
 
 
 class RegisterForm(FlaskForm):
