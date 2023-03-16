@@ -23,7 +23,8 @@ year = date.today().year
 @login_required
 def profile(user_id):
     user = User.query.get_or_404(user_id)
-    posts = BlogPost.query.filter_by(author_id=user_id).all()
+    posts = BlogPost.query.filter_by(author_id=user_id).order_by(BlogPost.id.desc()).all()
+
     return render_template("profile.html", year=year, current_user=current_user, all_posts=posts, user=user)
 
 
