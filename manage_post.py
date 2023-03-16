@@ -97,6 +97,7 @@ def edit_post(post_id):
         body=post.body,
         post_id=post.id
     )
+
     if edit_form.validate_on_submit():
         if edit_form.img_url.data:
             img = edit_form.img_url
