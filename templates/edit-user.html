@@ -1,5 +1,6 @@
 {% extends 'bootstrap/base.html' %}
 {% import "bootstrap/wtf.html" as wtf %}
+{% block title %}{{user.name}}{% endblock %}
 
 {% block content %}
 {% include "header.html" %}
@@ -23,7 +24,7 @@
                  style="background-image: url('{% if user.profile %}{{ url_for('user_bp.profile_img', filename=user.profile) }}{% else %}{{ url_for('static', filename='img/default_profile/def_user.png') }}{% endif %}')">
             </div>
         </div>
-        <h1>{{ user.name }}</h1>
+        <p><b>{{ user.name }}</b> {% if user.id in auth_users %} (Admin) {% endif %}</p>
     </div>
 </header>
 

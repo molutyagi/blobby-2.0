@@ -377,6 +377,10 @@ header.masthead .post-heading .meta a {
   color: #0085A1;
 }
 
+.profile-post {
+  margin-left: 25px;
+}
+
 @media only screen and (min-width: 768px) {
   .post-preview > a > .post-title {
     font-size: 36px;

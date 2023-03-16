@@ -86,7 +86,7 @@ year = date.today().year
 
 @app.route('/')
 def get_all_posts():
-    posts = BlogPost.query.all()
+    posts = BlogPost.query.order_by(BlogPost.id.desc()).all()
     return render_template("index.html", all_posts=posts, logged_in=current_user.is_authenticated, year=year)
 
 

@@ -1,6 +1,6 @@
 {% extends 'bootstrap/base.html' %}
 {% import "bootstrap/wtf.html" as wtf %}
-
+{% block title %}{{user.name}}{% endblock %}
 
 {% block content %}
 {% include "header.html" %}
@@ -69,7 +69,7 @@
                 <h1 class="post-title" style="color:#0085A1">{% if user.id == current_user.id %}Your Blogs
                     {% else%}{{ user.name}}'s Blogs {% endif %}</h1>
                 {% for post in all_posts %}
-                <div class="post-preview">
+                <div class="post-preview profile-post">
                     <a href="{{ url_for('post_bp.show_post', post_id=post.id) }}">
                         <h2 class="post-title">
                             {{post.title}}

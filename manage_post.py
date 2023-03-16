@@ -88,6 +88,7 @@ def edit_post(post_id):
     post = BlogPost.query.get_or_404(post_id)
     file_path = None
     img_id = img = None
+    is_edit = True
     if post.img_url:
         file_path = os.path.join(UPLOAD_BLOG_IMG, post.img_url)
     edit_form = CreatePostForm(
@@ -119,7 +120,7 @@ def edit_post(post_id):
         except Exception as e:
             db.session.rollback()
 
-    return render_template("make-post.html", form=edit_form, year=year)
+    return render_template("make-post.html", form=edit_form, year=year, is_edit=is_edit)
 
 
 @post_bp.route("/delete_post/<int:post_id>", methods=["GET", "POST"])
