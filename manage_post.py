@@ -43,9 +43,8 @@ def show_post(post_id):
         img_url = None
         if requested_post.img_url:
             img_url = url_for('post_bp.uploaded_file', filename=requested_post.img_url)
-
         return render_template("post.html", post=requested_post, form=form, current_user=current_user, img_url=img_url,
-                               year=year, )
+                               year=year)
     flash("You're not logged-in. Kindly Log-in")
     return redirect(url_for('get_all_posts'))
 
@@ -54,12 +53,14 @@ def show_post(post_id):
 @login_required
 def add_new_post():
     form = CreatePostForm()
-    img = img_id = img_url = None
+    img = img_id = img_file = img_url = None
     if form.validate_on_submit():
-        if form.img_url.data:
-            img = form.img_url
+        if form.img_file.data or form.img_file.data and form.img_url.data:
+            img = form.img_file
             img_id = img_to_uuid(img)
-            img_url = img_id
+            img_file = img_id
+        if not form.img_file.data and form.img_url.data:
+            img_url = form.img_url.data
 
         try:
             new_post = BlogPost(
@@ -67,10 +68,11 @@ def add_new_post():
                 subtitle=form.subtitle.data,
                 body=form.body.data,
                 img_url=img_url,
+                img_file=img_file,
                 author=current_user,
                 date=datetime.now().strftime("%B %d, %Y %I:%M %p")
             )
-            if img_url:
+            if img_file:
                 img.data.save(os.path.join(app.config['UPLOAD_BLOG_IMG'], img_id))
             db.session.add(new_post)
             db.session.commit()
@@ -86,35 +88,42 @@ def add_new_post():
 @login_required
 def edit_post(post_id):
     post = BlogPost.query.get_or_404(post_id)
-    file_path = None
-    img_id = img = None
+    file_path = img = img_id = img_file = img_url = None
     is_edit = True
-    if post.img_url:
-        file_path = os.path.join(UPLOAD_BLOG_IMG, post.img_url)
+    if post.img_file:
+        file_path = os.path.join(UPLOAD_BLOG_IMG, post.img_file)
     edit_form = CreatePostForm(
         title=post.title,
         subtitle=post.subtitle,
         author=post.author,
         body=post.body,
+        img_url=img_url,
         post_id=post.id
     )
 
     if edit_form.validate_on_submit():
-        if edit_form.img_url.data:
-            img = edit_form.img_url
+        if edit_form.img_file.data or edit_form.img_file.data and edit_form.img_url.data:
+            img = edit_form.img_file
             img_id = img_to_uuid(img)
+        if edit_form.img_url.data and not edit_form.img_file.data:
+            img_url = edit_form.img_url.data
         try:
             post.title = edit_form.title.data
             post.subtitle = edit_form.subtitle.data
             if img_id:
-                post.img_url = img_id
+                post.img_file = img_id
+                post.img_url = None
+                img.data.save(os.path.join(app.config['UPLOAD_BLOG_IMG'], img_id))
+                if file_path:
+                    delete_file(file_path)
+            if img_url:
+                post.img_file=None
+                post.img_url = img_url
+                if file_path:
+                    delete_file(file_path)
             post.body = edit_form.body.data
             db.session.commit()
-            if file_path and img_id:
-                delete_file(file_path)
 
-            if img_id:
-                img.data.save(os.path.join(app.config['UPLOAD_BLOG_IMG'], img_id))
 
             return redirect(url_for("post_bp.show_post", post_id=post_id))
         except Exception as e:
