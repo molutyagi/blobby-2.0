@@ -113,16 +113,17 @@ def edit_post(post_id):
             if img_id:
                 post.img_file = img_id
                 post.img_url = None
-            else:
+                img.data.save(os.path.join(app.config['UPLOAD_BLOG_IMG'], img_id))
+                if file_path:
+                    delete_file(file_path)
+            if img_url:
                 post.img_file=None
                 post.img_url = img_url
+                if file_path:
+                    delete_file(file_path)
             post.body = edit_form.body.data
             db.session.commit()
-            if file_path and img_id:
-                delete_file(file_path)
-                img.data.save(os.path.join(app.config['UPLOAD_BLOG_IMG'], img_id))
-            if file_path and img_url:
-                delete_file(file_path)
+
 
             return redirect(url_for("post_bp.show_post", post_id=post_id))
         except Exception as e:
