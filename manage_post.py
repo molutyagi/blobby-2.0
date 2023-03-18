@@ -88,7 +88,7 @@ def add_new_post():
 @login_required
 def edit_post(post_id):
     post = BlogPost.query.get_or_404(post_id)
-    file_path = img = img_id = img_file = img_url = None
+    file_path = img = img_id = img_url = None
     is_edit = True
     if post.img_file:
         file_path = os.path.join(UPLOAD_BLOG_IMG, post.img_file)
@@ -137,13 +137,13 @@ def edit_post(post_id):
 def delete_post(post_id):
     post_to_delete = BlogPost.query.get_or_404(post_id)
     file_path = None
-    if post_to_delete.img_url:
-        file_path = os.path.join(UPLOAD_BLOG_IMG, post_to_delete.img_url)
+    if post_to_delete.img_file:
+        file_path = os.path.join(UPLOAD_BLOG_IMG, post_to_delete.img_file)
     try:
         Comment.query.filter_by(post_id=post_id).delete()
         db.session.delete(post_to_delete)
         db.session.commit()
-        if post_to_delete.img_url:
+        if post_to_delete.img_file:
             delete_file(file_path)
         flash("Blog post was deleted.")
         return redirect(url_for('get_all_posts'))
