@@ -11,7 +11,7 @@ from db import BlogPost
 class CreatePostForm(FlaskForm):
     title = StringField("Blog Post Title", validators=[DataRequired()])
     subtitle = StringField("Subtitle", validators=[DataRequired()])
-    img_file = FileField("Blog Image")
+    img_file = FileField("Blog Image File")
     img_url = StringField("Blog Image URL")
     body = CKEditorField("Blog Content", validators=[DataRequired()])
     post_id = HiddenField()
