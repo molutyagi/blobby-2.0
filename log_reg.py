@@ -5,6 +5,7 @@ from flask_login import login_user, current_user, logout_user, login_required
 from forms import RegisterForm, LoginForm
 from db import User, db
 from datetime import date
+from functions import get_session
 
 log_bp = Blueprint('log_reg', __name__)
 
@@ -30,6 +31,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         login_user(new_user)
+        get_session()
         return redirect(url_for("get_all_posts"))
     return render_template("register.html", form=form, logged_in=current_user.is_authenticated, year=year)
 
@@ -48,10 +50,12 @@ def login():
         elif check_password_hash(user.password, password):
             login_user(user)
             flash("Successfully logged in.")
+            get_session()
             return redirect(url_for('get_all_posts'))
         else:
             flash("Wrong Password. Please try again.")
             return redirect(url_for('log_reg.login'))
+    get_session()
     return render_template("login.html", form=form, logged_in=current_user.is_authenticated, year=year)
 
 
@@ -60,4 +64,5 @@ def login():
 def logout():
     logout_user()
     flash("You Have Been Logged Out!  Thanks For Stopping By...")
+
     return redirect(url_for('get_all_posts'))
