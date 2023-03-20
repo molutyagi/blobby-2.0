@@ -20,13 +20,6 @@ year = date.today().year
 app = Flask(__name__)
 app.app_context().push()
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
-#
-# app.config["SESSION_PERMANENT"] = False
-# app.config["SESSION_TYPE"] = "cookie"
-# app.config["SESSION_COOKIE_SECURE"] = True
-# app.config["SESSION_COOKIE_HTTPONLY"] = True
-# app.config["SESSION_COOKIE_SAMESITE"] = "Strict"
-# Session(app)
 
 ckeditor = CKEditor(app)
 Bootstrap(app)
@@ -104,3 +97,4 @@ if __name__ == "__main__":
 
 def application(env, start_response):
     return app(env, start_response)
+
