@@ -11,7 +11,7 @@ from datetime import date
 from log_reg import logout_user
 
 app = Flask(__name__)
-UPLOAD_USER_IMG = os.getenv('UPLOAD_USER_IMG')
+UPLOAD_USER_IMG = os.environ.get('UPLOAD_USER_IMG')
 app.config['UPLOAD_USER_IMG'] = UPLOAD_USER_IMG
 
 user_bp = Blueprint('user_bp', __name__)

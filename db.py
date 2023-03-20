@@ -1,14 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin
-from flask import Flask
 
 db = SQLAlchemy()
-
-# app = Flask(__name__)
-
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///blogs.db'
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 
 class User(UserMixin, db.Model):
@@ -48,7 +42,6 @@ class Comment(db.Model):
     post_id = db.Column(db.Integer, db.ForeignKey("blog_posts.id"))
     parent_post = relationship("BlogPost", back_populates="comments")
     text = db.Column(db.Text, nullable=False)
-
 
 # db.init_app(app)
 # with app.app_context():
