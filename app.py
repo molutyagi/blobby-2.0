@@ -13,13 +13,10 @@ from others import others_bp
 from manage_user import user_bp
 from handle_error import error_bp
 from manage_post import post_bp
-from dotenv import load_dotenv
-
-load_dotenv()
 
 app = Flask(__name__)
 app.app_context().push()
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
@@ -29,7 +26,7 @@ ckeditor = CKEditor(app)
 Bootstrap(app)
 
 # CONNECT TO DB
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['STATIC_FOLDER'] = 'static'

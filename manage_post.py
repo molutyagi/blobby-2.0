@@ -10,7 +10,7 @@ from flask import Blueprint
 from flask import render_template
 
 app = Flask(__name__)
-UPLOAD_BLOG_IMG = os.getenv('UPLOAD_BLOG_IMG')
+UPLOAD_BLOG_IMG = os.environ.get('UPLOAD_BLOG_IMG')
 app.config['UPLOAD_BLOG_IMG'] = UPLOAD_BLOG_IMG
 
 post_bp = Blueprint('post_bp', __name__)
