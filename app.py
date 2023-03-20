@@ -13,9 +13,6 @@ from others import others_bp
 from manage_user import user_bp
 from handle_error import error_bp
 from manage_post import post_bp
-from dotenv import load_dotenv
-
-load_dotenv()
 year = date.today().year
 app = Flask(__name__)
 app.app_context().push()
