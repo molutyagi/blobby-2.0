@@ -1,6 +1,6 @@
 import os
 from functools import wraps
-from flask import Flask, render_template, abort
+from flask import Flask, render_template, abort, session
 from flask_bootstrap import Bootstrap
 from flask_ckeditor import CKEditor
 from datetime import date
@@ -13,14 +13,20 @@ from others import others_bp
 from manage_user import user_bp
 from handle_error import error_bp
 from manage_post import post_bp
+from dotenv import load_dotenv
 
+load_dotenv()
+year = date.today().year
 app = Flask(__name__)
 app.app_context().push()
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
-
-app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_TYPE"] = "filesystem"
-Session(app)
+#
+# app.config["SESSION_PERMANENT"] = False
+# app.config["SESSION_TYPE"] = "cookie"
+# app.config["SESSION_COOKIE_SECURE"] = True
+# app.config["SESSION_COOKIE_HTTPONLY"] = True
+# app.config["SESSION_COOKIE_SAMESITE"] = "Strict"
+# Session(app)
 
 ckeditor = CKEditor(app)
 Bootstrap(app)
@@ -64,6 +70,19 @@ def admin_only(f):
     return decorated_function
 
 
+@app.route("/get_session_data")
+def get_session_data():
+    return f"Session data: {session.get('username', 'Not set')}"
+
+
+@app.route('/')
+def get_all_posts():
+    if current_user.is_authenticated:
+        session["username"] = current_user.name
+    posts = BlogPost.query.order_by(BlogPost.id.desc()).all()
+    return render_template("index.html", all_posts=posts, logged_in=current_user.is_authenticated, year=year)
+
+
 app.register_blueprint(error_bp)
 app.register_blueprint(log_bp)
 app.register_blueprint(others_bp)
@@ -78,14 +97,6 @@ gravatar = Gravatar(app,
                     force_lower=False,
                     use_ssl=False,
                     base_url=None)
-year = date.today().year
-
-
-@app.route('/')
-def get_all_posts():
-    posts = BlogPost.query.order_by(BlogPost.id.desc()).all()
-    return render_template("index.html", all_posts=posts, logged_in=current_user.is_authenticated, year=year)
-
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)
