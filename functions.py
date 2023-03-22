@@ -2,7 +2,7 @@ from flask import Flask
 from flask_session import Session
 from werkzeug.utils import secure_filename
 import uuid as uuid
-
+import redis
 import os
 
 
@@ -12,11 +12,8 @@ def get_session():
     with app.app_context():
         app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 
-        app.config["SESSION_PERMANENT"] = False
-        app.config["SESSION_TYPE"] = "cookie"
-        app.config["SESSION_COOKIE_SECURE"] = True
-        app.config["SESSION_COOKIE_HTTPONLY"] = True
-        app.config["SESSION_COOKIE_SAMESITE"] = "Strict"
+        app.config['SESSION_TYPE'] = 'redis'
+        app.config['SESSION_REDIS'] = redis.from_url('redis://localhost:6379')
         Session(app)
 
 
