@@ -20,7 +20,7 @@ year = date.today().year
 
 
 @user_bp.route("/profile/<int:user_id>", methods=["GET", "POST"])
-@login_required
+# @login_required
 def profile(user_id):
     user = User.query.get_or_404(user_id)
     posts = BlogPost.query.filter_by(author_id=user_id).order_by(BlogPost.id.desc()).all()

@@ -6,7 +6,6 @@ from flask_ckeditor import CKEditor
 from datetime import date
 from flask_login import LoginManager, current_user
 from flask_gravatar import Gravatar
-from flask_session import Session
 from db import User, BlogPost, db
 from log_reg import log_bp
 from others import others_bp
@@ -20,13 +19,6 @@ year = date.today().year
 app = Flask(__name__)
 app.app_context().push()
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
-#
-# app.config["SESSION_PERMANENT"] = False
-# app.config["SESSION_TYPE"] = "cookie"
-# app.config["SESSION_COOKIE_SECURE"] = True
-# app.config["SESSION_COOKIE_HTTPONLY"] = True
-# app.config["SESSION_COOKIE_SAMESITE"] = "Strict"
-# Session(app)
 
 ckeditor = CKEditor(app)
 Bootstrap(app)
@@ -66,7 +58,6 @@ def admin_only(f):
         if current_user.id not in auth_users:
             return abort(403)
         return f(*args, **kwargs)
-
     return decorated_function
 
 
