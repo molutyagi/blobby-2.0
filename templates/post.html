@@ -8,22 +8,22 @@
 <!-- Page Header -->
 <header class="masthead"
         style="background-image: url('{% if post.img_file %}{{ url_for('post_bp.uploaded_file', filename=post.img_file)}}{% elif post.img_url %}{{post.img_url}}{% else %}{{ url_for('static', filename='img/default_profile/def_wall.jpg') }}{% endif %}')">
-<div class="overlay"></div>
-<div class="container">
-    <div class="row">
-        <div class="col-lg-8 col-md-10 mx-auto">
-            <div class="post-heading">
-                <h1>{{post.title}}</h1>
-                <h2 class="subheading">{{post.subtitle}}</h2>
-                <span class="meta">Posted by
+    <div class="overlay"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-md-10 mx-auto">
+                <div class="post-heading">
+                    <h1>{{post.title}}</h1>
+                    <h2 class="subheading">{{post.subtitle}}</h2>
+                    <span class="meta">Posted by
                       <a href="{{url_for('user_bp.profile', user_id=post.author.id) }}">{{post.author.name}}</a>
                       on {{post.date}}</span>
-                <p>{{is_file}}</p>
+                    <p>{{is_file}}</p>
 
+                </div>
             </div>
         </div>
     </div>
-</div>
 </header>
 
 <!-- Post Content -->
@@ -51,9 +51,11 @@
 
 
                 <!--           Comments Area -->
+                {% if current_user.is_authenticated %}
                 {{ ckeditor.load() }}
                 {{ ckeditor.config(name='body') }}
                 {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+                {% endif %}
                 <div class="col-lg-8 col-md-10 mx-auto comment">
                     {% for comment in post.comments: %}
                     <ul class="commentList">

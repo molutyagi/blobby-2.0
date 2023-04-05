@@ -6,7 +6,6 @@ from flask_ckeditor import CKEditor
 from datetime import date
 from flask_login import LoginManager, current_user
 from flask_gravatar import Gravatar
-from flask_session import Session
 from db import User, BlogPost, db
 from log_reg import log_bp
 from others import others_bp
@@ -56,7 +55,6 @@ def admin_only(f):
         if current_user.id not in auth_users:
             return abort(403)
         return f(*args, **kwargs)
-
     return decorated_function
 
 

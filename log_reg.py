@@ -55,7 +55,6 @@ def login():
         else:
             flash("Wrong Password. Please try again.")
             return redirect(url_for('log_reg.login'))
-    get_session()
     return render_template("login.html", form=form, logged_in=current_user.is_authenticated, year=year)
 
 

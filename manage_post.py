@@ -26,27 +26,27 @@ def uploaded_file(filename):
 @post_bp.route("/post/<int:post_id>", methods=["GET", "POST"])
 # @login_required
 def show_post(post_id):
-    if current_user.is_authenticated:
-        requested_post = BlogPost.query.get_or_404(post_id)
-        form = CommentForm()
-        if form.validate_on_submit():
-            if not current_user.id:
-                return redirect(url_for('get_all_posts'))
-            new_comment = Comment(
-                text=form.body.data,
-                post_id=post_id,
-                author_id=current_user.id
-            )
-            db.session.add(new_comment)
-            db.session.commit()
-            return redirect(url_for('post_bp.show_post', post_id=requested_post.id))
-        img_url = None
-        if requested_post.img_url:
-            img_url = url_for('post_bp.uploaded_file', filename=requested_post.img_url)
-        return render_template("post.html", post=requested_post, form=form, current_user=current_user, img_url=img_url,
-                               year=year)
-    flash("You're not logged-in. Kindly Log-in")
-    return redirect(url_for('get_all_posts'))
+    # if current_user.is_authenticated:
+    requested_post = BlogPost.query.get_or_404(post_id)
+    form = CommentForm()
+    if form.validate_on_submit():
+        if not current_user.id:
+            return redirect(url_for('get_all_posts'))
+        new_comment = Comment(
+            text=form.body.data,
+            post_id=post_id,
+            author_id=current_user.id
+        )
+        db.session.add(new_comment)
+        db.session.commit()
+        return redirect(url_for('post_bp.show_post', post_id=requested_post.id))
+    img_url = None
+    if requested_post.img_url:
+        img_url = url_for('post_bp.uploaded_file', filename=requested_post.img_url)
+    return render_template("post.html", post=requested_post, form=form, current_user=current_user, img_url=img_url,
+                           year=year)
+    # flash("You're not logged-in. Kindly Log-in")
+    # return redirect(url_for('get_all_posts'))
 
 
 @post_bp.route("/new-post", methods=["GET", "POST"])
