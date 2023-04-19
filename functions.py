@@ -4,6 +4,12 @@ from werkzeug.utils import secure_filename
 import uuid as uuid
 import redis
 import os
+import re
+
+
+def check_password(password):
+    pattern = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+    return bool(re.match(pattern, password))
 
 
 def get_session():

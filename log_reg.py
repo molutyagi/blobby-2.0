@@ -5,7 +5,7 @@ from flask_login import login_user, current_user, logout_user, login_required
 from forms import RegisterForm, LoginForm
 from db import User, db
 from datetime import date
-from functions import get_session
+from functions import get_session, check_password
 
 log_bp = Blueprint('log_reg', __name__)
 
@@ -22,6 +22,14 @@ def register():
         if form.password.data != form.confirm_password.data:
             flash("Password does not match. Try again.")
             return redirect(url_for('log_reg.register'))
+
+        uniqpass = check_password(form.password.data)
+        if not uniqpass:
+            flash(
+                "Kindly input an eight character password that consists atleast one uppercase, one lowercase, "
+                "one digit & one special character.")
+            return redirect(url_for('log_reg.register'))
+
         hashed = generate_password_hash(form.password.data, method='pbkdf2:sha256', salt_length=8)
         new_user = User(
             email=form.email.data,
@@ -33,6 +41,9 @@ def register():
         login_user(new_user)
         get_session()
         return redirect(url_for("get_all_posts"))
+    flash(
+        "The password should be eight characters long that consists atleast one uppercase, one lowercase, "
+        "one digit & one special character.")
     return render_template("register.html", form=form, logged_in=current_user.is_authenticated, year=year)
 
 
