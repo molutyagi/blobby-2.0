@@ -96,11 +96,14 @@ def delete_user(user_id):
             delete_file(wall_path)
 
         for post in user_to_delete.posts:
-            delete_post = current_app.view_functions['post_bp.delete_post']
+
             with current_app.test_request_context():
                 delete_post(post_id=post.id)
+            print("for e")
 
+        print("reach cmt")
         Comment.query.filter_by(author_id=user_id).delete()
+        print("reach lgout")
 
         logout_user()
         db.session.delete(user_to_delete)

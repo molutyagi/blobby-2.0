@@ -12,9 +12,6 @@ from others import others_bp
 from manage_user import user_bp
 from handle_error import error_bp
 from manage_post import post_bp
-from dotenv import load_dotenv
-
-load_dotenv()
 year = date.today().year
 app = Flask(__name__)
 app.app_context().push()
@@ -89,9 +86,7 @@ gravatar = Gravatar(app,
                     use_ssl=False,
                     base_url=None)
 
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000, debug=True)
-
 
 def application(env, start_response):
     return app(env, start_response)
+
