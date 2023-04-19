@@ -29,12 +29,13 @@ def profile(user_id):
 
 
 @user_bp.route("/edit_user/<int:user_id>", methods=["GET", "POST"])
+@login_required
 def edit_user(user_id):
-    if not current_user.is_authenticated:
-        return redirect(url_for('login'))
-
     user = User.query.get_or_404(user_id)
 
+    if not current_user.id == user.id:
+        # flash("You are not authorized to do this task.")
+        return render_template("403.html")
     profile_path = os.path.join(app.config['UPLOAD_USER_IMG'], user.profile) if user.profile else None
     wall_path = os.path.join(app.config['UPLOAD_USER_IMG'], user.wall) if user.wall else None
 
@@ -83,6 +84,9 @@ def wall_img(filename):
 def delete_user(user_id):
     user_to_delete = User.query.get_or_404(user_id)
     try:
+        if not current_user.id == user_to_delete.id:
+            # flash("You are not authorized to do this task.")
+            return render_template("403.html")
         if user_to_delete.profile:
             profile_path = os.path.join(UPLOAD_USER_IMG, user_to_delete.profile)
             delete_file(profile_path)
