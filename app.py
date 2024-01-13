@@ -6,15 +6,18 @@ from flask_ckeditor import CKEditor
 from datetime import date
 from flask_login import LoginManager, current_user
 from flask_gravatar import Gravatar
+from dotenv import load_dotenv
 from db import User, BlogPost, db
 from log_reg import log_bp
 from others import others_bp
 from manage_user import user_bp
 from handle_error import error_bp
 from manage_post import post_bp
+
 year = date.today().year
 app = Flask(__name__)
 app.app_context().push()
+load_dotenv()
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 
 ckeditor = CKEditor(app)
@@ -55,12 +58,13 @@ def admin_only(f):
         if current_user.id not in auth_users:
             return abort(403)
         return f(*args, **kwargs)
+
     return decorated_function
 
 
-@app.route("/get_session_data")
-def get_session_data():
-    return f"Session data: {session.get('username', 'Not set')}"
+# @app.route("/get_session_data")
+# def get_session_data():
+#     return f"Session data: {session.get('username', 'Not set')}"
 
 
 @app.route('/')
@@ -87,6 +91,8 @@ gravatar = Gravatar(app,
                     base_url=None)
 
 
-def application(env, start_response):
-    return app(env, start_response)
+# def application(env, start_response):
+#     return app(env, start_response)
 
+if __name__ == "__main__":
+    app.run(debug=True)

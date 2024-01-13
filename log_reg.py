@@ -26,7 +26,7 @@ def register():
         uniqpass = check_password(form.password.data)
         if not uniqpass:
             flash(
-                "Kindly input an eight character password that consists atleast one uppercase, one lowercase, "
+                "Kindly input an eight character password that consists at least one uppercase, one lowercase, "
                 "one digit & one special character.")
             return redirect(url_for('log_reg.register'))
 
@@ -42,7 +42,7 @@ def register():
         get_session()
         return redirect(url_for("get_all_posts"))
     flash(
-        "The password should be eight characters long that consists atleast one uppercase, one lowercase, "
+        "The password should be eight characters long that consists at least one uppercase, one lowercase, "
         "one digit & one special character.")
     return render_template("register.html", form=form, logged_in=current_user.is_authenticated, year=year)
 

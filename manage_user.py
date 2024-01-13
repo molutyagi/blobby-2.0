@@ -9,6 +9,7 @@ from flask import Blueprint
 from flask import render_template
 from datetime import date
 from log_reg import logout_user
+from manage_post import delete_post
 
 app = Flask(__name__)
 UPLOAD_USER_IMG = os.environ.get('UPLOAD_USER_IMG')
@@ -99,11 +100,8 @@ def delete_user(user_id):
 
             with current_app.test_request_context():
                 delete_post(post_id=post.id)
-            print("for e")
 
-        print("reach cmt")
         Comment.query.filter_by(author_id=user_id).delete()
-        print("reach lgout")
 
         logout_user()
         db.session.delete(user_to_delete)

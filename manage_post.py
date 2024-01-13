@@ -43,7 +43,7 @@ def show_post(post_id):
     img_url = None
     if requested_post.img_url:
         img_url = url_for('post_bp.uploaded_file', filename=requested_post.img_url)
-    return render_template("post.html", post=requested_post, form=form, current_user=current_user, img_url=img_url,
+    return render_template("post.html", post=requested_post, form=form, current_user=current_user, mg_url=img_url,
                            year=year)
     # flash("You're not logged-in. Kindly Log-in")
     # return redirect(url_for('get_all_posts'))
@@ -88,6 +88,9 @@ def add_new_post():
 @login_required
 def edit_post(post_id):
     post = BlogPost.query.get_or_404(post_id)
+    if not current_user.id == post.author.id:
+        return render_template("403.html")
+
     file_path = img = img_id = img_url = None
     is_edit = True
     if post.img_file:
@@ -117,13 +120,12 @@ def edit_post(post_id):
                 if file_path:
                     delete_file(file_path)
             if img_url:
-                post.img_file=None
+                post.img_file = None
                 post.img_url = img_url
                 if file_path:
                     delete_file(file_path)
             post.body = edit_form.body.data
             db.session.commit()
-
 
             return redirect(url_for("post_bp.show_post", post_id=post_id))
         except Exception as e:
@@ -136,6 +138,9 @@ def edit_post(post_id):
 @login_required
 def delete_post(post_id):
     post_to_delete = BlogPost.query.get_or_404(post_id)
+    if not current_user.id == post_to_delete.author.id:
+        # flash("You are not authorized to do this task.")
+        return render_template("403.html")
     file_path = None
     if post_to_delete.img_file:
         file_path = os.path.join(UPLOAD_BLOG_IMG, post_to_delete.img_file)
@@ -158,6 +163,9 @@ def delete_post(post_id):
 @login_required
 def delete_cmt(cmt_id):
     cmt_to_delete = Comment.query.get_or_404(cmt_id)
+    if not current_user.id == cmt_id:
+        # flash("You are not authorized to do this task.")
+        return render_template("403.html")
     try:
         Comment.query.filter_by(post_id=cmt_id).delete()
         db.session.delete(cmt_to_delete)

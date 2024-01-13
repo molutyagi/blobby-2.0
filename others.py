@@ -6,6 +6,7 @@ others_bp = Blueprint('others', __name__)
 
 year = date.today().year
 
+
 @others_bp.route("/about")
 def about():
     return render_template("about.html", year=year)
